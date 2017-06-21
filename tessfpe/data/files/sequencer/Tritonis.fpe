@@ -1,10 +1,10 @@
 /*
 
-Bias flateness test using reverse parallel clocks.
+Bias flatness test using reverse parallel clocks. Serials are forward, as in PhaseDance.
 
 Attempts to flatten bias by sloshing charge back and forth in the serials for 32 pixel cycles after a parallel to serial transfer.
 
-Integrates in P1-IA and P2-IA. Holds charge in P2-FS.
+Integrates in P1-IA and P2-IA. Holds charge in P1-FS and P2-FS.
 	
 Defaults to a disabled measurement chain with charge queued in P2-OR and P3-OR.
 
@@ -20,10 +20,10 @@ defaults {
     P1-IA-2 high P2-IA-2 high P3-IA-2 low
     P1-IA-3 high P2-IA-3 high P3-IA-3 low
     P1-IA-4 high P2-IA-4 high P3-IA-4 low
-    P1-FS-1 low P2-FS-1 high P3-FS-1 low
-    P1-FS-2 low P2-FS-2 high P3-FS-2 low
-    P1-FS-3 low P2-FS-3 high P3-FS-3 low
-    P1-FS-4 low P2-FS-4 high P3-FS-4 low
+    P1-FS-1 high P2-FS-1 high P3-FS-1 low
+    P1-FS-2 high P2-FS-2 high P3-FS-2 low
+    P1-FS-3 high P2-FS-3 high P3-FS-3 low
+    P1-FS-4 high P2-FS-4 high P3-FS-4 low
     P1-OR low P2-OR high P3-OR high
     P1-U high P2-U high P3-U high
     RG high ID high
@@ -120,9 +120,9 @@ pump" for a subsequent pixcycle. It does no measurement chain clocking. The prog
 should follow this with a no_data pixcycle to move the information through the
 measurement chain to the ADC input.
 
-Leaves with the next rows in P2-FS, the next pixels in P2-OR and P3-OR.
+Leaves with the next rows in P1-FS and P2-FS, the next pixels in P2-OR and P3-OR.
 
-Reverse clocking version, P1-FS, P3-FS exchanged.
+Reverse clocking version, P1-FS, P3-FS exchanged relative to formard.
 
 */
 
@@ -130,19 +130,19 @@ sequence fr2serial {
     P3-OR low		/* block charge motion between columns */
     step(12)
     P1-OR high		/* accept charge into both P1-OR and P2-OR */
-    P1-FS-1 high P1-FS-2 high P1-FS-3 high P1-FS-4 high	/* open P1-FS to move up */
-    step(24)
     P2-FS-1 low P2-FS-2 low P2-FS-3 low P2-FS-4 low	/* push charge to P1-FS */
     step(24)
     P3-FS-1 high P3-FS-2 high P3-FS-3 high P3-FS-4 high	/* allow into P3-FS */
     step(24)
     P1-FS-1 low P1-FS-2 low P1-FS-3 low P1-FS-4 low	/* push charge from P1 */
     step(24)
-    P1-OR low		/* first pump priming step */
     P2-FS-1 high P2-FS-2 high P2-FS-3 high P2-FS-4 high	/* next row to P2 */
     step(24)
-    P3-OR high		/* final pump priming, OR charge in P2 and P3 */
+    P1-OR low		/* first pump priming step */
     P3-FS-1 low P3-FS-2 low P3-FS-3 low P3-FS-4 low	/* FS charge in P2 only */
+    step(24)
+    P3-OR high		/* final pump priming, OR charge in P2 and P3 */
+    P1-FS-1 high P1-FS-2 high P1-FS-3 high P1-FS-4 high	/* open P1-FS to move up */
     step(12)
 }
 
@@ -157,7 +157,6 @@ Switches P1 and P2 for reverse transfers.
 */
 
 sequence rowtransfer1 {
-    P3-U high			/* override default, leave U wide open */
     P2-IA-1 low P2-FS-1 low
     step(24)
     P3-IA-1 high P3-FS-1 high
@@ -173,7 +172,6 @@ sequence rowtransfer1 {
 }
 
 sequence rowtransfer2 {
-    P3-U high			/* override default, leave U wide open */
     P2-IA-2 low P2-FS-2 low
     step(24)
     P3-IA-2 high P3-FS-2 high
@@ -189,7 +187,6 @@ sequence rowtransfer2 {
 }
 
 sequence rowtransfer3 {
-    P3-U high			/* override default, leave U wide open */
     P2-IA-3 low P2-FS-3 low
     step(24)
     P3-IA-3 high P3-FS-3 high
@@ -205,7 +202,6 @@ sequence rowtransfer3 {
 }
 
 sequence rowtransfer4 {
-    P3-U high			/* override default, leave U wide open */
     P2-IA-4 low P2-FS-4 low
     step(24)
     P3-IA-4 high P3-FS-4 high
